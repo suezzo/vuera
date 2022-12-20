@@ -1,9 +1,32 @@
-var vuera = (function (exports,React,ReactDOM,Vue) {
+var vuera = (function (exports,React,Vue) {
 'use strict';
 
 React = React && React.hasOwnProperty('default') ? React['default'] : React;
-ReactDOM = ReactDOM && ReactDOM.hasOwnProperty('default') ? ReactDOM['default'] : ReactDOM;
 Vue = Vue && Vue.hasOwnProperty('default') ? Vue['default'] : Vue;
+
+var m = require('react-dom');
+if (process.env.NODE_ENV === 'production') {
+  exports.createRoot = m.createRoot;
+  exports.hydrateRoot = m.hydrateRoot;
+} else {
+  var i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+  exports.createRoot = function (c, o) {
+    i.usingClientEntryPoint = true;
+    try {
+      return m.createRoot(c, o);
+    } finally {
+      i.usingClientEntryPoint = false;
+    }
+  };
+  exports.hydrateRoot = function (c, h, o) {
+    i.usingClientEntryPoint = true;
+    try {
+      return m.hydrateRoot(c, h, o);
+    } finally {
+      i.usingClientEntryPoint = false;
+    }
+  };
+}
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -348,18 +371,18 @@ var ReactWrapper = {
 
       var Component = makeReactContainer(component);
       var children = this.$slots.default !== undefined ? { children: this.$slots.default } : {};
-      ReactDOM.render(React.createElement(Component, _extends({}, this.$props.passedProps, this.$attrs, this.$listeners, children, {
+      this.$root = undefined(this.$refs.react).render(React.createElement(Component, _extends({}, this.$props.passedProps, this.$attrs, this.$listeners, children, {
         ref: function ref(_ref) {
           return _this2.reactComponentRef = _ref;
         }
-      })), this.$refs.react);
+      })));
     }
   },
   mounted: function mounted() {
     this.mountReactComponent(this.$props.component);
   },
   beforeDestroy: function beforeDestroy() {
-    ReactDOM.unmountComponentAtNode(this.$refs.react);
+    this.$root.unmount();
   },
   updated: function updated() {
     /**
@@ -496,4 +519,4 @@ exports.config = config;
 
 return exports;
 
-}({},React,ReactDOM,Vue));
+}({},React,Vue));
